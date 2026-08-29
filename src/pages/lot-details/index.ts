@@ -1,0 +1,1 @@
+export { LotDetailsPage } from './ui/LotDetailsPage';
