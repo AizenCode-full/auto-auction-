@@ -19,6 +19,58 @@ export const SearchLots: React.FC = () => {
   const [filteredSuggestions, setFilteredSuggestions] = useState<LotSuggestion[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
+  //  ЖИВОЙ ПЕЧАТАЮЩИЙ ПЛЕЙСХОЛДЕР
+  const [placeholderText, setPlaceholderText] = useState<string>('');
+  
+  
+  const phrases = [
+    'Лоты по всему Кыргызстану...',
+    'Поиск по марке автомобиля...',
+    'Лоты в городе Бишкек...',
+    'Toyota Camry 2024...',
+    'BMW X5 Внедорожник...',
+    'Mercedes-Benz E-Класс...',
+    'Поиск по VIN номеру...',
+    'Поиск по номеру лота...',
+    
+  ];
+  
+  useEffect(() => {
+    let currentPhraseIndex = 0;
+    let currentCharacterIndex = 0;
+    let isDeleting = false;
+    let typingSpeed = 5; // Скорость печати букв (мс)
+
+    const type = () => {
+      const currentPhrase = phrases[currentPhraseIndex];
+
+      if (isDeleting) {
+        setPlaceholderText(currentPhrase.substring(0, currentCharacterIndex - 1));
+        currentCharacterIndex--;
+        typingSpeed = 35; // Стирание 
+      } else {
+        setPlaceholderText(currentPhrase.substring(0, currentCharacterIndex + 1));
+        currentCharacterIndex++;
+        typingSpeed = 90;
+      }
+
+      if (!isDeleting && currentCharacterIndex === currentPhrase.length) {
+        isDeleting = true;
+        typingSpeed = 2200; // Удержание фраза 
+      } else if (isDeleting && currentCharacterIndex === 0) {
+        isDeleting = false;
+        currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length;
+        typingSpeed = 400; // Пауза перед новой фразой
+      }
+
+      timerId = setTimeout(type, typingSpeed);
+    };
+
+    let timerId = setTimeout(type, typingSpeed);
+    return () => clearTimeout(timerId);
+  }, []);
+
+  //  Лоты из PostgreSQL
   useEffect(() => {
     axios.get<any>('http://localhost:3000/lots')
       .then((res) => {
@@ -29,9 +81,8 @@ export const SearchLots: React.FC = () => {
       });
   }, []);
 
-  //  ФИЛЬТРАЦИЯ
+  //  ЖИВАЯ ФИЛЬТРАЦИЯ
   useEffect(() => {
-    // Если строка пустая — выводим последние 5 лотов из базы данных
     if (searchQuery.trim() === '') {
       setFilteredSuggestions(allLots.slice(0, 5));
       return;
@@ -47,7 +98,7 @@ export const SearchLots: React.FC = () => {
     setFilteredSuggestions(matches.slice(0, 5));
   }, [searchQuery, allLots]);
 
-  // 3. ЗАКРЫТИЕ ПО КЛИКУ МИМО
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -66,18 +117,17 @@ export const SearchLots: React.FC = () => {
 
   return (
     <>
-      {/*  Затемнение и размытие  заднего фона при поиске */}
+      {/*  ОВЕРЛЕЙ */}
       {isDropdownOpen && (
         <div 
           className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300 z-40 cursor-pointer"
-          onClick={() => setIsDropdownOpen(false)} // Закрываем поиск при клике на темный фон
+          onClick={() => setIsDropdownOpen(false)}
         />
       )}
 
-    
+      {/* поиск */}
       <div className={`relative w-[320px] font-sans ${isDropdownOpen ? 'z-50' : 'z-30'}`} ref={menuRef}>
         
-        {/* Поисковая строка */}
         <div className="relative w-full h-[47px]">
           <input
             type="text"
@@ -87,18 +137,19 @@ export const SearchLots: React.FC = () => {
               setIsDropdownOpen(true);
             }}
             onFocus={() => setIsDropdownOpen(true)}
-            placeholder="Поиск лотов (Марка, модель, ID)..."
-            className="w-full h-full bg-[#f5f8fc] border border-[#1c426d]/10 rounded-lg pl-10 pr-4 text-sm font-medium text-[#163C66] placeholder-gray-400 outline-none focus:border-[#163C66] focus:bg-white transition-all box-border shadow-xs"
+            placeholder={placeholderText}
+            className="w-full h-full bg-[#f5f8fc] border border-[#1c426d]/10 rounded-lg pl-10 pr-4 text-sm font-semibold text-[#163C66] placeholder:text-black/80 outline-none focus:border-[#163C66] focus:bg-white transition-all box-border shadow-xs"
           />
           
+          {/* Лупа*/}
           <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-gray-400">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+          </svg>
           </div>
         </div>
 
-        {/*ВЫПАДАЮЩИЙ СПИСОК */}
+        {/* ВЫПАДАЮЩИЙ СПИСОК */}
         {isDropdownOpen && filteredSuggestions.length > 0 && (
           <div className="absolute top-[54px] left-0 w-full bg-white border border-gray-100 rounded-xl shadow-2xl py-2 flex flex-col animate-fade-in max-h-[300px] overflow-y-auto">
             <div className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[#a0a6b5] border-b border-gray-50 mb-1">
@@ -129,7 +180,7 @@ export const SearchLots: React.FC = () => {
           </div>
         )}
 
-        {/* если совпадений нет */}
+        {/* Заглушка */}
         {isDropdownOpen && searchQuery.trim() !== '' && filteredSuggestions.length === 0 && (
           <div className="absolute top-[54px] left-0 w-full bg-white border border-gray-100 rounded-xl shadow-2xl py-4 px-4 text-center text-xs text-gray-400 font-medium italic">
             Совпадений в базе данных не найдено

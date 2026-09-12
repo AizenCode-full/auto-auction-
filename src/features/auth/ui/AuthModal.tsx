@@ -62,7 +62,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSwitchT
               className="w-full h-[52px] border border-[#1c426d]/20 rounded-xl px-4 text-sm text-black outline-none focus:border-[#163C66] placeholder:text-[#a0a6b5] [-webkit-text-security:asterisk]"
             />
             <div className="flex items-center gap-1.5 pl-1">
-              <span className="text-sm text-[#8a94a6]">🔒</span>
+             <svg 
+               className="w-5 h-5 text-current shrink-0 transition-transform duration-200 group-hover:scale-110" 
+               fill="none" 
+               stroke="currentColor" 
+               viewBox="0 0 24 24"
+               strokeWidth="2.4" 
+               strokeLinecap="round" 
+               strokeLinejoin="round"
+>
+ 
+              <rect x="5" y="11" width="14" height="10" rx="2" ry="2" />
+              <path d="M12 3a4 4 0 00-4 4v4h8V7a4 4 0 00-4-4z" />
+              </svg>
+
+
               <a href="#" className="text-sm text-[#8a94a6] hover:underline" onClick={(e) => e.preventDefault()}>Забыли пароль?</a>
             </div>
           </div>
