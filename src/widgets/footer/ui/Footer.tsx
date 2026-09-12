@@ -54,15 +54,15 @@ export const Footer: React.FC = () => {
                 onError={(e) => (e.target as HTMLImageElement).style.display='none'} 
               />
             </div>
-            <p className="mt-[30px] text-xs text-[#a0aec0] m-0">2009 - 2021 © Все права защищены.</p>
+            <p className="mt-[30px] text-xs text-[#a0aec0] m-0">2025 - 2026 © Все права защищены.</p>
           </div>
           <div className="flex flex-col">
             <div className="flex flex-col gap-3.5">
               <div className="flex flex-wrap items-baseline gap-3">
-                <a href="tel:88005502665" className="text-2xl sm:text-[32px] font-bold text-[#0b315e] no-underline hover:opacity-90 transition-opacity">
-                  8 800 550-26-65
+                <a href="tel:312705829393" className="text-2xl sm:text-[32px] font-bold text-[#0b315e] no-underline hover:opacity-90 transition-opacity">
+                  (312) 705 82 93 93
                 </a>
-                <span className="text-xs text-[#a0aec0]">Звонок по России бесплатный</span>
+                <span className="text-xs text-[#a0aec0]">Звонок по КР бесплатный</span>
               </div>
               <a href="mailto:assist@sd-assist.ru" className="text-xl sm:text-2xl text-[#1a4273] no-underline font-medium hover:opacity-90 transition-opacity">
                 assist@sd-assist.ru
@@ -90,7 +90,7 @@ export const Footer: React.FC = () => {
             </div>
 
             <p className="mt-[35px] text-xs leading-relaxed text-[#718096] m-0">
-              Свидетельство о регистрации электронного СМИ ЭЛ № ФС 77 - 76018 выдано Федеральной службой по надзору в сфере связи, информационных технологий и массовых коммуникаций 24.06.2019 года
+              Свидетельство о регистрации электронного СМИ ЭЛ № ФС 77 - 76018 выдано Федеральной службой по надзору в сфере связи, информационных технологий и массовых коммуникаций 24.06.2026 года
             </p>
           </div>
 
