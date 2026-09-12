@@ -16,8 +16,8 @@ export const router = createBrowserRouter([
         element: <Hero />,
       },
       {
-        path: 'lots/:id',
-        element: <LotDetailsPage lotId={null} onBack={() => {}} />,
+        path: 'lots/:id', 
+        element: <LotDetailsPage />,
       },
       {
         path: 'dashboard',
