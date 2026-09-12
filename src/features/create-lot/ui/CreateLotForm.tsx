@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Form, Select, DatePicker, Input, Checkbox, message } from 'antd';
 import { CalendarOutlined } from '@ant-design/icons';
+import { uploadImages } from '../../../shared/api/uploads';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
@@ -14,7 +15,6 @@ interface StepItem {
   id: number;
   label: string;
 }
-
 
 
 interface FormValues {
@@ -86,43 +86,47 @@ export const CreateLotForm: React.FC<CreateLotFormProps> = ({ onSuccess }) => {
   const handleNextStep = async () => {
     try {
       const currentValues = form.getFieldsValue();
-      
       const updatedData = { ...formDataAccumulated, ...currentValues };
       setFormDataAccumulated(updatedData);
 
       if (currentStep < 3) {
         setCurrentStep(prev => prev + 1);
       } else {
-        const formData = new FormData();
         
-        formData.append('brand', updatedData.brand_select || 'Toyota'); 
-        formData.append('model', updatedData.model_select || 'Camry'); 
-        formData.append('year', String(updatedData.year_select || '2024')); 
-        formData.append('vin', updatedData.vin || 'БЕЗ-VIN');
-        formData.append('vehicle_type', updatedData.vehicle_type || 'Легковой');
-        formData.append('region', updatedData.region || 'Москва');
-        formData.append('city', updatedData.city || 'Москва');
-        formData.append('auction_type', updatedData.auctionType || 'Открытый');
-        formData.append('startPrice', updatedData.startPrice || '1500000'); 
-        formData.append('transmission', updatedData.transmission_type || 'Автомат');
-        formData.append('mileage_km', updatedData.mileage || '0');
+        message.loading({ content: 'Загрузка фотографий в облако ImgBB...', key: 'upload_status' });
         
-        const engineVol = updatedData.engine_volume || '2.5';
-        const engineType = updatedData.engine_type || 'Бензин';
-        formData.append('engine', `${engineVol} л / ${engineType}`);
-        formData.append('seller', 'ООО Альфа Страхование');
+        let imageUrlsString = '';
+        try {
+          
+          const uploadedUrls = await uploadImages(selectedFiles);
+          imageUrlsString = uploadedUrls.join(','); 
+          message.success({ content: 'Фотографии успешно загружены в облако!', key: 'upload_status', duration: 2 });
+        } catch (uploadError: any) {
+          console.error(uploadError);
+          message.error({ content: `Сбой ImgBB: ${uploadError.message || 'не удалось загрузить фото'}`, key: 'upload_status' });
+          return; 
+        }
 
-        selectedFiles.forEach((file) => {
-          formData.append('images', file);
-        });
+        const payload = {
+          brand: updatedData.brand_select || 'Toyota',
+          model: updatedData.model_select || 'Camry',
+          year: Number(updatedData.year_select || 2024),
+          vin: updatedData.vin || 'БЕЗ-VIN',
+          vehicle_type: updatedData.vehicle_type || 'Легковой',
+          region: updatedData.region || 'Москва',
+          city: updatedData.city || 'Москва',
+          auction_type: updatedData.auctionType || 'Открытый',
+          startPrice: updatedData.startPrice || '1500000',
+          transmission: updatedData.transmission_type || 'Автомат',
+          mileage_km: Number(updatedData.mileage || 0),
+          engine: `${updatedData.engine_volume || '2.5'} л / ${updatedData.engine_type || 'Бензин'}`,
+          seller: 'ООО Альфа Страхование',
+          mainImage: imageUrlsString 
+        };
 
-        // Отправляем POST запрос на Nest.js бэкенд
-        await axios.post('http://localhost:3000/lots', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        await axios.post('http://localhost:3000/lots', payload);
 
         message.success('Лот успешно сохранен в PostgreSQL и запущен!');
-        
         setFormDataAccumulated({});
         if (onSuccess) onSuccess();
       }
@@ -759,7 +763,7 @@ export const CreateLotForm: React.FC<CreateLotFormProps> = ({ onSuccess }) => {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
                         onChange={(e) => {
                           if (e.target.files && e.target.files.length > 0) {
-                            setPdfName(e.target.files[0].name); // Фиксируем имя PDF для UI
+                            setPdfName(e.target.files[0].name); 
                             message.success(`Документ прикреплен`);
                           }
                         }}

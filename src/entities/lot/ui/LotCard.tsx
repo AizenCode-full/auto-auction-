@@ -30,16 +30,11 @@ export const LotCard: React.FC<LotProps> = ({ data }) => {
 
 
   const allImages = image_url ? image_url.split(',') : [];
-  const rawImage = allImages.length > 0 ? allImages[0] : '';
-  const cleanImage = typeof rawImage === 'string' ? rawImage.trim() : '';
+  const firstImage = allImages.length > 0 ? allImages[0].trim() : '';
 
-  
-  let displayImage = "https://placehold.co"; //  заглушка
-  if (cleanImage) {
-    displayImage = cleanImage.startsWith('/') 
-      ? `http://localhost:3000${cleanImage}` 
-      : `http://localhost:3000/${cleanImage}`;
-  }
+  const displayImage = firstImage.startsWith('http') 
+    ? firstImage 
+    : "https://unsplash.com";
 
   const isOpen = auction_type === 'Открытый';
 

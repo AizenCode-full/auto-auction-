@@ -15,10 +15,13 @@ interface LotRowData {
 
 interface LotRowCardProps {
   data: LotRowData;
-  onCardClick?: (id: number) => void; 
+  onCardClick?: (id: number) => void;
 }
 
-export const LotRowCard: React.FC<LotRowCardProps> = ({ data, onCardClick }) => {
+export const LotRowCard: React.FC<LotRowCardProps> = ({
+  data,
+  onCardClick,
+}) => {
   const {
     id,
     title,
@@ -28,36 +31,28 @@ export const LotRowCard: React.FC<LotRowCardProps> = ({ data, onCardClick }) => 
     mileage_km,
     engine,
     min_bid_rub,
-    image_url
+    image_url,
   } = data;
 
   const navigate = useNavigate();
 
- 
-  const allImages = image_url ? image_url.split(',') : [];
-  const rawImage = allImages.length > 0 ? allImages[0] : '';
-  const cleanImage = typeof rawImage === 'string' ? rawImage.trim() : '';
+  const allImages = image_url
+    ? image_url.split(',').map((url) => url.trim()).filter(Boolean)
+    : [];
 
-  let displayImage = "https://placehold.co"; 
-  if (cleanImage) {
-    displayImage = cleanImage.startsWith('/') 
-      ? `http://localhost:3000${cleanImage}` 
-      : `http://localhost:3000/${cleanImage}`;
-  }
+  const displayImage = allImages[0] || 'https://placehold.co/600x400';
 
   const handleNavigation = () => {
-    
     if (onCardClick) {
       onCardClick(id);
     } else {
-      
       navigate(`/lots/${id}`);
     }
   };
 
   return (
-    <div 
-      className="flex border-b border-gray-200 py-4 w-full h-[170px] box-border gap-6 font-sans cursor-pointer transition-colors hover:bg-gray-50/50" 
+    <div
+      className="flex border-b border-gray-200 py-4 w-full h-[170px] box-border gap-6 font-sans cursor-pointer transition-colors hover:bg-gray-50/50"
       onClick={handleNavigation}
     >
       {/* Фотография лота */}
@@ -65,10 +60,14 @@ export const LotRowCard: React.FC<LotRowCardProps> = ({ data, onCardClick }) => 
         <div className="absolute top-1.5 left-1.5 bg-[#163C66] text-white text-[10px] font-medium py-0.5 px-1.5 rounded-[3px] z-10">
           Горячий лот 1 час
         </div>
-        <img 
-          src={displayImage} 
-          alt={title} 
+
+        <img
+          src={displayImage}
+          alt={title}
           className="w-full h-full object-cover rounded block border border-gray-100"
+          onError={(e) => {
+            e.currentTarget.src = 'https://placehold.co/600x400';
+          }}
         />
       </div>
 
@@ -76,14 +75,42 @@ export const LotRowCard: React.FC<LotRowCardProps> = ({ data, onCardClick }) => 
         <h3 className="text-base font-bold text-black m-0 mb-1 truncate">
           {title} – Лот № {id}
         </h3>
+
         <p className="text-xs text-[#718096] m-0 mb-3">
-          Продавец: <strong className="font-normal text-[#2d3748]">{seller}</strong>
+          Продавец:{' '}
+          <strong className="font-normal text-[#2d3748]">
+            {seller}
+          </strong>
         </p>
+
         <div className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs text-[#a0aec0]">
-          <div className="truncate">Год выпуска: <strong className="text-black font-bold ml-1">{year}</strong></div>
-          <div className="truncate">КПП: <strong className="text-black font-bold ml-1">{transmission}</strong></div>
-          <div className="truncate">Пробег: <strong className="text-black font-bold ml-1">{Number(mileage_km).toLocaleString('ru-RU')} км</strong></div>
-          <div className="truncate">Двигатель: <strong className="text-black font-bold ml-1">{engine}</strong></div>
+          <div className="truncate">
+            Год выпуска:{' '}
+            <strong className="text-black font-bold ml-1">
+              {year}
+            </strong>
+          </div>
+
+          <div className="truncate">
+            КПП:{' '}
+            <strong className="text-black font-bold ml-1">
+              {transmission}
+            </strong>
+          </div>
+
+          <div className="truncate">
+            Пробег:{' '}
+            <strong className="text-black font-bold ml-1">
+              {Number(mileage_km).toLocaleString('ru-RU')} км
+            </strong>
+          </div>
+
+          <div className="truncate">
+            Двигатель:{' '}
+            <strong className="text-black font-bold ml-1">
+              {engine}
+            </strong>
+          </div>
         </div>
       </div>
 
@@ -91,8 +118,12 @@ export const LotRowCard: React.FC<LotRowCardProps> = ({ data, onCardClick }) => 
         <div className="text-[11px] text-[#8c3232] bg-[#fdf2f2] border border-[#fde8e8] py-1 px-2.5 rounded-full font-medium">
           ⏱ До 5к 5мин
         </div>
+
         <div className="text-right w-full">
-          <span className="block text-[11px] text-[#718096] mb-0.5">Текущая цена:</span>
+          <span className="block text-[11px] text-[#718096] mb-0.5">
+            Текущая цена:
+          </span>
+
           <span className="text-lg font-bold text-[#163C66]">
             {Number(min_bid_rub).toLocaleString('ru-RU')} ₽
           </span>
