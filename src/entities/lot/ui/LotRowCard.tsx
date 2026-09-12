@@ -1,4 +1,6 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
 interface LotRowData {
   id: number;
   title: string;
@@ -10,10 +12,12 @@ interface LotRowData {
   min_bid_rub: number;
   image_url: string;
 }
+
 interface LotRowCardProps {
   data: LotRowData;
-  onCardClick: (id: number) => void;
+  onCardClick?: (id: number) => void; 
 }
+
 export const LotRowCard: React.FC<LotRowCardProps> = ({ data, onCardClick }) => {
   const {
     id,
@@ -27,24 +31,48 @@ export const LotRowCard: React.FC<LotRowCardProps> = ({ data, onCardClick }) => 
     image_url
   } = data;
 
+  const navigate = useNavigate();
+
+ 
+  const allImages = image_url ? image_url.split(',') : [];
+  const rawImage = allImages.length > 0 ? allImages[0] : '';
+  const cleanImage = typeof rawImage === 'string' ? rawImage.trim() : '';
+
+  let displayImage = "https://placehold.co"; 
+  if (cleanImage) {
+    displayImage = cleanImage.startsWith('/') 
+      ? `http://localhost:3000${cleanImage}` 
+      : `http://localhost:3000/${cleanImage}`;
+  }
+
+  const handleNavigation = () => {
+    
+    if (onCardClick) {
+      onCardClick(id);
+    } else {
+      
+      navigate(`/lots/${id}`);
+    }
+  };
+
   return (
-   
     <div 
       className="flex border-b border-gray-200 py-4 w-full h-[170px] box-border gap-6 font-sans cursor-pointer transition-colors hover:bg-gray-50/50" 
-      onClick={() => onCardClick && onCardClick(id)}
+      onClick={handleNavigation}
     >
+      {/* Фотография лота */}
       <div className="relative w-[200px] h-[135px] shrink-0">
         <div className="absolute top-1.5 left-1.5 bg-[#163C66] text-white text-[10px] font-medium py-0.5 px-1.5 rounded-[3px] z-10">
           Горячий лот 1 час
         </div>
         <img 
-          src={image_url ? image_url : "https://placehold.co"} 
+          src={displayImage} 
           alt={title} 
-          className="w-full h-full object-cover rounded"
+          className="w-full h-full object-cover rounded block border border-gray-100"
         />
       </div>
-      <div className="flex-grow flex flex-col justify-start min-w-0">
-        {/* .row-card-title */}
+
+      <div className="flex-grow flex flex-col justify-start min-w-0 text-left">
         <h3 className="text-base font-bold text-black m-0 mb-1 truncate">
           {title} – Лот № {id}
         </h3>
@@ -54,10 +82,11 @@ export const LotRowCard: React.FC<LotRowCardProps> = ({ data, onCardClick }) => 
         <div className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs text-[#a0aec0]">
           <div className="truncate">Год выпуска: <strong className="text-black font-bold ml-1">{year}</strong></div>
           <div className="truncate">КПП: <strong className="text-black font-bold ml-1">{transmission}</strong></div>
-          <div className="truncate">Пробег: <strong className="text-black font-bold ml-1">{mileage_km.toLocaleString('ru-RU')} км</strong></div>
+          <div className="truncate">Пробег: <strong className="text-black font-bold ml-1">{Number(mileage_km).toLocaleString('ru-RU')} км</strong></div>
           <div className="truncate">Двигатель: <strong className="text-black font-bold ml-1">{engine}</strong></div>
         </div>
       </div>
+
       <div className="w-[180px] flex flex-col items-end justify-start gap-5 shrink-0">
         <div className="text-[11px] text-[#8c3232] bg-[#fdf2f2] border border-[#fde8e8] py-1 px-2.5 rounded-full font-medium">
           ⏱ До 5к 5мин
@@ -65,7 +94,7 @@ export const LotRowCard: React.FC<LotRowCardProps> = ({ data, onCardClick }) => 
         <div className="text-right w-full">
           <span className="block text-[11px] text-[#718096] mb-0.5">Текущая цена:</span>
           <span className="text-lg font-bold text-[#163C66]">
-            {min_bid_rub.toLocaleString('ru-RU')} ₽
+            {Number(min_bid_rub).toLocaleString('ru-RU')} ₽
           </span>
         </div>
       </div>

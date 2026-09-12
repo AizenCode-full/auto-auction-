@@ -1,22 +1,16 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
+import { RouterProvider } from 'react-router-dom'; 
 import { store } from './app/store';
+import { router } from './app/providers/router';
 import './index.css';
 
-const rootElement = document.getElementById('root');
-
-if (!rootElement) {
-  throw new Error('Не удалось найти корневой элемент root в index.html');
-}
-
-ReactDOM.createRoot(rootElement).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      
+      <RouterProvider router={router} />
     </Provider>
   </React.StrictMode>,
 );
-
-

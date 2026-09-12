@@ -1,6 +1,9 @@
 import React from 'react';
 import { SearchLots } from '@/features/search-lots';
-import { useUser } from '@/entities/user';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '@/app/store';
+import { logoutSuccess } from '@/entities/user';
+
 
 interface HeaderProps {
   onOpenAuth: () => void;
@@ -13,7 +16,12 @@ export const Header: React.FC<HeaderProps> = ({
   onAddLotClick, 
   onLogoClick 
 }) => {
-  const { isAuth } = useUser();
+
+
+const dispatch = useDispatch();
+const isAuth = useSelector((state: RootState) => state.auth.isAuth);
+const logout = () => dispatch(logoutSuccess());
+
 
   return (
     <header className="w-full h-[108px] bg-white border-b border-[#1c426d]/10 flex justify-center items-center box-sizing-border">
