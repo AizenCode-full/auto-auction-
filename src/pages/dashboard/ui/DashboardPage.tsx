@@ -15,7 +15,12 @@ interface Lot {
   engine: string;
   min_bid_rub: number;
   image_url: string;
-  auction_type: 'Открытый' | 'Закрытый' | 'Архив'; 
+  auction_type: 'Открытый' | 'Закрытый' | 'Архив';
+  brand?: string;
+  vin?: string;
+  vehicle_type?: string;
+  city?: string;
+  region?: string;
 }
 
 type TabId = 'active' | 'completed' | 'archive';
@@ -35,22 +40,25 @@ export const DashboardPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 5; 
 
+ 
+  const [activeFilters, setActiveFilters] = useState<any>({});
+
   const tabs: TabItem[] = [
     { id: 'active', label: 'Мои активные', filter: 'Открытый' },
     { id: 'completed', label: 'Мои завершенные', filter: 'Закрытый' },
     { id: 'archive', label: 'Архив', filter: 'Архив' },
   ];
 
+  // Сброс страницы на первую при переключении вкладок
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab]);
 
-  // Запрос к Nest.js бэкенду за всеми лотами из PostgreSQL
+  // Запрос к Nest.js бэкенду
   useEffect(() => {
     setLoading(true);
     axios.get<any>('http://localhost:3000/lots')
       .then((res) => {
-      
         setLots(res.data.data || []);
         setLoading(false);
       })
@@ -62,18 +70,47 @@ export const DashboardPage: React.FC = () => {
 
 
   const currentFilter = tabs.find(t => t.id === activeTab)?.filter;
-  const filteredLots = lots.filter(lot => lot.auction_type === currentFilter);
+  let filteredLots = lots.filter(lot => lot.auction_type === currentFilter);
+
+
+  if (activeFilters.brand) {
+    filteredLots = filteredLots.filter(lot => lot.brand?.toLowerCase() === activeFilters.brand.toLowerCase());
+  }
+  if (activeFilters.auctionType) {
+    filteredLots = filteredLots.filter(lot => lot.auction_type === activeFilters.auctionType);
+  }
+  if (activeFilters.lotId) {
+    filteredLots = filteredLots.filter(lot => String(lot.id).includes(activeFilters.lotId.trim()));
+  }
+  if (activeFilters.vinFrame) {
+    filteredLots = filteredLots.filter(lot => lot.vin?.toLowerCase().includes(activeFilters.vinFrame.toLowerCase().trim()));
+  }
+  if (activeFilters.vehicleType) {
+    filteredLots = filteredLots.filter(lot => lot.vehicle_type?.toLowerCase() === activeFilters.vehicleType.toLowerCase());
+  }
+  if (activeFilters.region) {
+    filteredLots = filteredLots.filter(lot => 
+      lot.city?.toLowerCase() === activeFilters.region.toLowerCase() || 
+      lot.region?.toLowerCase() === activeFilters.region.toLowerCase()
+    );
+  }
+  if (activeFilters.yearFrom) {
+    filteredLots = filteredLots.filter(lot => lot.year >= Number(activeFilters.yearFrom));
+  }
+  if (activeFilters.yearTo) {
+    filteredLots = filteredLots.filter(lot => lot.year <= Number(activeFilters.yearTo));
+  }
+
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentPageLots = filteredLots.slice(indexOfFirstItem, indexOfLastItem);
-  
   const totalPages = Math.ceil(filteredLots.length / itemsPerPage);
 
   return (
     <div className="max-w-[1200px] mx-auto py-6 px-4 font-sans box-border text-left">
       
-      {/* Шапка дашборда */}
+      {/* Шапка  */}
       <div className="flex justify-between items-center mb-5 border-b border-gray-100 pb-4">
         <h2 className="text-2xl font-bold text-black m-0">Активные лоты</h2>
         <button 
@@ -84,6 +121,7 @@ export const DashboardPage: React.FC = () => {
         </button>
       </div>
 
+      {/* Навигация */}
       <nav className="mb-6 border-b border-gray-200">
         <ul className="list-none p-0 m-0 flex gap-8">
           {tabs.map((tab) => (
@@ -103,11 +141,24 @@ export const DashboardPage: React.FC = () => {
         </ul>
       </nav>
 
+     
       <div className="flex flex-col md:flex-row gap-8 items-start w-full">
-        
-         <div className="w-full md:w-[260px] md:min-w-[260px] shrink-0 m-0 p-0 bg-transparent">
-          <FilterLots />
+      
+        <div className="w-full md:w-[260px] md:min-w-[260px] shrink-0 m-0 p-0 bg-transparent">
+          <FilterLots 
+            onFilterChange={(filters) => {
+              setActiveFilters(filters);
+              setCurrentPage(1); 
+            }}
+            onReset={() => {
+              setActiveFilters({});
+              setCurrentPage(1);
+            }}
+            totalLotsCount={filteredLots.length}
+          />
         </div>
+
+        {/* Правая колонка: Список автомобилей */}
         <div className="flex-1 min-w-0 flex flex-col w-full">
           {loading ? (
             <p className="text-gray-500 py-4 font-medium">Загрузка автомобилей из базы данных...</p>
@@ -126,6 +177,7 @@ export const DashboardPage: React.FC = () => {
                 )}
               </div>
 
+              {/* Пагинация */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-1.5 mt-8 select-none">
                   <button 
@@ -186,7 +238,6 @@ export const DashboardPage: React.FC = () => {
                       </button>
                     </>
                   )}
-
                   <button 
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
@@ -204,4 +255,3 @@ export const DashboardPage: React.FC = () => {
     </div>
   );
 };
-

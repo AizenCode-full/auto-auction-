@@ -55,9 +55,9 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center mr-12">
               <div onClick={onLogoClick} className="flex items-center cursor-pointer no-underline">
                 <img 
-                  src="/logo.svg" 
-                  alt="SDAssistance"
-                  className="h-12 w-auto block object-contain" 
+                  src="/asina.jpg" 
+                  alt="Asina Auto-Tech"
+                  className="h-26 w-auto block object-contain" 
                 />
               </div>
             </div>
